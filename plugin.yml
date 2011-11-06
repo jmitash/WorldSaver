@@ -1,0 +1,9 @@
+name: WorldSaver
+main: servm.knoxcorner.worldsaver.worldSaver
+version: 1.3
+description: A plugin that saves the world on schedule
+authors: [knoxcorner]
+commands:
+    ws:
+      description: WorldSaver general command (type for help)
+      usage: /ws [command] [arguments]
