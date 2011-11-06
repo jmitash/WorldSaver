@@ -26,8 +26,10 @@ public class forceSave {
     
     
     public static boolean save() {
+        if (worldSaver.bconsave) {
         Bukkit.getServer().broadcastMessage(ChatColor.GREEN + "[WorldSaver] Saving worlds, you may experience lag");
-        saveRunner.waiting(3000);
+        saveRunner.waiting(250);
+        }
         Bukkit.getServer().savePlayers();
     for( World world : Bukkit.getServer().getWorlds() ){
         world.save();

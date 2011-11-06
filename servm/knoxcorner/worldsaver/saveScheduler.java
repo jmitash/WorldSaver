@@ -43,9 +43,11 @@ public class saveScheduler implements Runnable{
 
         
         if (worldSaver.runBackupRoutine == true || worldSaver.command.equalsIgnoreCase("forcebackup")) {
+            if (worldSaver.bconbu) {
             Bukkit.getServer().broadcastMessage(ChatColor.GREEN +"[WorldSaver] Backing up worlds, you may experience lag");
+            saveRunner.waiting(250);
+            } 
             log.log(Level.INFO, "[WorldSaver] Backing up worlds, WARNING: The server may stop responding, do not close!");
-            saveRunner.waiting(1000);
             try {
                         for (World world : Bukkit.getServer().getWorlds()) {
                         worldname = world.getName();
@@ -90,11 +92,13 @@ public class saveScheduler implements Runnable{
                         }
                         } else {}
                         } else {}
-                        } else {System.out.println("[WorldSaver] Skipping: " + worldname);}
+                        } else {System.out.println("[WorldSaver] Skipping world: " + worldname);}
                         
                         }
                         pluginsaved = false;
-                        System.out.println("[WorldSaver] Backup Finished");
+                        if (worldSaver.bconbu) {
+                        Bukkit.getServer().broadcastMessage(ChatColor.GREEN + "[WorldSaver] Backup Finished");
+                        }
             } catch (IOException ex) {
                 Logger.getLogger(saveScheduler.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -107,11 +111,11 @@ public class saveScheduler implements Runnable{
     	throws IOException{
         boolean goodtocopy = true;
         String tpath = src.getCanonicalPath();
-        for (Object tobj : worldSaver.wlist.toArray()) {
+        for (Object tobj : worldSaver.plist.toArray()) {
         String tstring = tobj.toString();
         if (tpath.contains(tstring)){goodtocopy = false; break;}
         }
-        if (!goodtocopy) {System.out.println("[WorldSaver] Skipping plugin: " + src); return;}
+        if (!goodtocopy) { String[] tstr = src.getCanonicalPath().split("plugins"); System.out.println("[WorldSaver] Skipping plugin: " + tstr[1]); return;}
         else {
  
     	if(src.isDirectory()){

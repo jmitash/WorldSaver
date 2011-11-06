@@ -61,6 +61,8 @@ public class worldSaver extends JavaPlugin implements CommandExecutor  {
     static boolean cExPlugins = true;
     static List wlist;
     static List plist;
+    static boolean bconsave = true;
+    static boolean bconbu = true;
     
 
         private static final Logger log = Bukkit.getServer().getLogger();
@@ -86,14 +88,14 @@ public class worldSaver extends JavaPlugin implements CommandExecutor  {
         } else if (command.equalsIgnoreCase("servertime") == true) {
             cs.sendMessage(ChatColor.LIGHT_PURPLE + scheduler.currentTime());
             return true;
-        } else  if (command.equalsIgnoreCase("togglesaveroutine") == true) {
+        } else  if (command.equalsIgnoreCase("saveroutine") == true) {
             
             cs.sendMessage(ChatColor.LIGHT_PURPLE + "Run save routine = " + runSaveRoutine);
             setSaveRoutine();
             log.log(Level.INFO, "[WorldSaver]Run save routine = " + runSaveRoutine + " (Changed by " + permrequester + ")");
             return true;
             
-        } else  if (command.equalsIgnoreCase("togglebackuproutine") == true) {
+        } else  if (command.equalsIgnoreCase("backuproutine") == true) {
             setBackupRoutine();
             cs.sendMessage((ChatColor.LIGHT_PURPLE + "Run backup routine = " + runBackupRoutine));
             log.log(Level.INFO, "[WorldSaver]Run backup routine = " + runBackupRoutine + " (Changed by " + permrequester + ")");
@@ -139,7 +141,7 @@ public class worldSaver extends JavaPlugin implements CommandExecutor  {
             log.log(Level.INFO, "[WorldSaver] Will save every " + saveminute + " minutes");
             return true;
         } else if (command.equalsIgnoreCase("saveoptions") == true) {
-            loadConfiguration();
+            saveConfiguration();
             cs.sendMessage(ChatColor.LIGHT_PURPLE + "Options saved");
             return true;
         } else if (command.equalsIgnoreCase("reloadoptions") == true) {
@@ -156,8 +158,6 @@ public class worldSaver extends JavaPlugin implements CommandExecutor  {
         cs.sendMessage(ChatColor.LIGHT_PURPLE + "Save every " + saveminute + " minutes    " + "Backup every " + hourbackup + " hours");
         cs.sendMessage(ChatColor.LIGHT_PURPLE + "Backup plugins folder: " + savePluginFolder + "   Backup everything in plugins folder: " + savePluginFolderAll);
         cs.sendMessage(ChatColor.LIGHT_PURPLE + "Let worldsaver manage default world save options = " + autosave);
-        } else if (command.equalsIgnoreCase("togglesaveplugins")) {setSavePlugins(); return true;
-        }else if (command.equalsIgnoreCase("togglesavepluginsall")) {setSavePluginsAll(); return true;
         }else if (command.equalsIgnoreCase("plugininfo")) { plugininfo();
         }else if (command.equalsIgnoreCase("autosavemanage")) { autoSaving();
         }else if (command.equalsIgnoreCase("optionsdefault")) { optionstodefault();
@@ -203,39 +203,39 @@ public class worldSaver extends JavaPlugin implements CommandExecutor  {
     
     public void setSaveMinute(int tempsavemin) {
     saveminute = tempsavemin;
-    loadConfiguration();
+    saveConfiguration();
     saveSchedule();
     return;
     }
     
     public void setBackupHour(int tempbackuphour) {
     hourbackup = tempbackuphour;
-    loadConfiguration();
+    saveConfiguration();
     backupSchedule();
     }
     
     public void setSaveRoutine() {
         runSaveRoutine = !runSaveRoutine;
-        loadConfiguration();
+        saveConfiguration();
         return;
     }
     
      public void setBackupRoutine() {
      runBackupRoutine = !runBackupRoutine;
-     loadConfiguration();
+     saveConfiguration();
      return;
     }
      
      public void setSavePlugins() {
          savePluginFolder = !savePluginFolder;
-         loadConfiguration();
+         saveConfiguration();
          cstemp.sendMessage("Will save plugin folder data = " + savePluginFolder);
          return;
      }
      
      public void setSavePluginsAll() {
          savePluginFolderAll = !savePluginFolderAll;
-         loadConfiguration();
+         saveConfiguration();
          cstemp.sendMessage("Will save entire plugin folder (if saveplugins is enabled) = " + savePluginFolderAll);
          return;
      }
@@ -249,7 +249,7 @@ public class worldSaver extends JavaPlugin implements CommandExecutor  {
      autosave = true;
      cExworlds = true;
      cExPlugins = true;
-     loadConfiguration();
+     saveConfiguration();
      if (cstemp == null) {
      log.log(Level.INFO, "[WorldSaver] Options set back to default");} 
      else {
@@ -259,7 +259,7 @@ public class worldSaver extends JavaPlugin implements CommandExecutor  {
      }
      public void autoSaving() {
      autosave = !autosave;
-     loadConfiguration();
+     saveConfiguration();
      cstemp.sendMessage("WorldSaver will manage save options of the world: " + autosave);
      if (autosave == false) {
          aSave(origsave);
@@ -282,8 +282,8 @@ public class worldSaver extends JavaPlugin implements CommandExecutor  {
             cstemp.sendMessage(ChatColor.LIGHT_PURPLE + "/ws forcebackup (forces a backup of the server");
             cstemp.sendMessage(ChatColor.LIGHT_PURPLE + "/ws setsaveminute [#of min] (set the save interval (minutes))");
             cstemp.sendMessage(ChatColor.LIGHT_PURPLE + "/ws setbackuphour [#of hours] (set the backup interval (hours))");//
-            cstemp.sendMessage(ChatColor.LIGHT_PURPLE + "/ws togglesaveroutine (toggles save routine on/off)");
-            cstemp.sendMessage(ChatColor.LIGHT_PURPLE + "/ws togglebackuproutine (toggles backup routine on/off)");
+            cstemp.sendMessage(ChatColor.LIGHT_PURPLE + "/ws saveroutine (toggles save routine on/off)");
+            cstemp.sendMessage(ChatColor.LIGHT_PURPLE + "/ws backuproutine (toggles backup routine on/off)");
             cstemp.sendMessage(ChatColor.LIGHT_PURPLE + "/ws optionsdefault (Will set the options back to default)");
             
             return;
@@ -294,8 +294,6 @@ public class worldSaver extends JavaPlugin implements CommandExecutor  {
             cstemp.sendMessage(ChatColor.LIGHT_PURPLE + "/ws servertime (returns the current time of the server)");
             cstemp.sendMessage(ChatColor.LIGHT_PURPLE + "/ws saveoptions (Forces a save of WorldSaver's options)");
             cstemp.sendMessage(ChatColor.LIGHT_PURPLE + "/ws reloadoptions (Reload's WorldSaver's options)");
-            cstemp.sendMessage(ChatColor.LIGHT_PURPLE + "/ws togglesaveplugins (Toggles whether to save plugins folder)");
-            cstemp.sendMessage(ChatColor.LIGHT_PURPLE + "/ws togglesavepluginsall (Toggles whether to save everything in the plugins folder (Only works if togglesaveplugins is enabled))");
             cstemp.sendMessage(ChatColor.LIGHT_PURPLE + "/ws viewoptions (Shows current settings for WorldSaver)");
             cstemp.sendMessage(ChatColor.LIGHT_PURPLE + "/ws plugininfo (Shows plugin details)");
             cstemp.sendMessage(ChatColor.LIGHT_PURPLE + "/ws autosavemanage (Will let worldsaver manage save options of a world)");
@@ -333,17 +331,77 @@ public class worldSaver extends JavaPlugin implements CommandExecutor  {
         
     }
     
-    public static void loadConfiguration() {
-        File configfile = new File(worldSaverOptions.getCurrentPath() + File.separator + "plugins" + File.separator + "WorldSaver" + File.separator + "config.yml");
+    public static void saveConfiguration() {
+        //File configfile = new File(worldSaverOptions.getCurrentPath() + File.separator + "plugins" + File.separator + "WorldSaver" + File.separator + "config.yml");
+        /*if (!configfile.exists()) {
+            boolean oldrsr = runSaveRoutine;
+            boolean oldrbr = runBackupRoutine;
+            boolean oldspfa = savePluginFolderAll;
+            boolean oldspf = savePluginFolder;
+            boolean oldas = autosave;
+            boolean oldcew = cExworlds;
+            boolean oldcep = cExPlugins;
+            List oldwl = wlist;
+            List oldpl = plist;
+            int oldhb = hourbackup;
+            int oldsm = saveminute;
+            loadConfiguration();
+            runSaveRoutine = oldrsr;
+            runBackupRoutine = oldrbr;
+            savePluginFolderAll = oldspfa;
+            savePluginFolder = oldspf;
+            autosave = oldas;
+            cExworlds = oldcew;
+            cExPlugins = oldcep;
+            wlist = oldwl;
+            plist = oldpl;
+            hourbackup = oldhb;
+            saveminute = oldsm;
+            }*/
         Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("WorldSaver");
+        
         String exworlds = "WorldSaver.Exclude_Worlds";
         String vpath = "WorldSaver.Version";
         String worlds[] = {"ExampleWorld"};
         String plugins[] = {"ExamplePlugin"};
         String ppath = "WorldSaver.Exclude_Plugins";
         String poptions = "WorldSaver.Options";
+        FileConfiguration cf = plugin.getConfig();
+        plugin.getConfig().set(exworlds, wlist);
+        plugin.getConfig().set(vpath, version);
+        plugin.getConfig().set(ppath, plist);
+        plugin.getConfig().set(poptions + ".RunSaveRoutine", runSaveRoutine);
+        plugin.getConfig().set(poptions + ".RunBackupRoutine", runBackupRoutine);
+        plugin.getConfig().set(poptions + ".saveEntirePluginFolder", savePluginFolderAll);
+        plugin.getConfig().set(poptions + ".savePluginData", savePluginFolder);
+        plugin.getConfig().set(poptions + ".HoursBetweenBackups", hourbackup);
+        plugin.getConfig().set(poptions + ".MinutesBetweenSaves", saveminute);
+        plugin.getConfig().set(poptions + ".AutoSaveManage", autosave);
+        plugin.getConfig().set(poptions + ".CheckExcludeWorlds", cExworlds);
+        plugin.getConfig().set(poptions + ".CheckExcludePlugins", cExPlugins);
+        plugin.getConfig().set(poptions + ".BroadcastOnSave", bconsave);
+        plugin.getConfig().set(poptions + ".BroadcastOnBackup", bconbu);
+        plugin.saveConfig();
+        
+        
+        }
+    
+    
+    
+    public static void loadConfiguration() {
+        File configfile = new File(worldSaverOptions.getCurrentPath() + File.separator + "plugins" + File.separator + "WorldSaver" + File.separator + "config.yml");
+        File oldoptionsfile = new File(worldSaverOptions.getCurrentPath() + File.separator + "plugins" + File.separator + "WorldSaver" + File.separator + "Options.txt");
+        Plugin plugin = Bukkit.getServer().getPluginManager().getPlugin("WorldSaver");
+        String exworlds = "WorldSaver.Exclude_Worlds";
+        String vpath = "WorldSaver.Version";
+        String pdispath = "WorldSaver.Disabled";
+        String worlds[] = {"ExampleWorld"};
+        String plugins[] = {"ExamplePlugin"};
+        String ppath = "WorldSaver.Exclude_Plugins";
+        String poptions = "WorldSaver.Options";
         //plugin.getConfig().addDefault(exworlds, worlds);
         plugin.getConfig().addDefault(exworlds, Arrays.asList(worlds));
+        plugin.getConfig().addDefault(pdispath, false);
         plugin.getConfig().addDefault(vpath, version);
         plugin.getConfig().addDefault(ppath, Arrays.asList(plugins));
         plugin.getConfig().addDefault(poptions + ".RunSaveRoutine", true);
@@ -355,11 +413,14 @@ public class worldSaver extends JavaPlugin implements CommandExecutor  {
         plugin.getConfig().addDefault(poptions + ".AutoSaveManage", true);
         plugin.getConfig().addDefault(poptions + ".CheckExcludeWorlds", true);
         plugin.getConfig().addDefault(poptions + ".CheckExcludePlugins", true);
+        plugin.getConfig().addDefault(poptions + ".BroadcastOnSave", true);
+        plugin.getConfig().addDefault(poptions + ".BroadcastOnBackup", true);
         if (configfile.exists()) {
         String tver = plugin.getConfig().getString(vpath);
         if (!tver.equalsIgnoreCase(version)) {
             log.log(Level.INFO, "[WorldSaver] Outdated config, deleting. Options will need to be reset.");
             configfile.delete();
+            if (oldoptionsfile.exists()) {oldoptionsfile.delete(); System.out.println("[WorldSaver] Old options.txt file deleted");}
             loadConfiguration();
             optionstodefault();
             return;
@@ -367,7 +428,9 @@ public class worldSaver extends JavaPlugin implements CommandExecutor  {
         FileConfiguration cf = plugin.getConfig();
         wlist = cf.getList(exworlds);
         plist = cf.getList(ppath);
-       
+        boolean disabled = cf.getBoolean("WorldSaver.Disabled");
+        //if (disabled) {Bukkit.getServer().getPluginManager().disablePlugin(plugin); return;
+        //}
         runSaveRoutine = cf.getBoolean(poptions + ".RunSaveRoutine");
         runBackupRoutine = cf.getBoolean(poptions + ".RunBackupRoutine");
         savePluginFolderAll = cf.getBoolean(poptions + ".saveEntirePluginFolder");
@@ -377,15 +440,17 @@ public class worldSaver extends JavaPlugin implements CommandExecutor  {
         cExPlugins = cf.getBoolean(poptions + ".CheckExcludePlugins");
         hourbackup = cf.getInt(poptions + ".HoursBetweenBackups");
         saveminute = cf.getInt(poptions + ".MinutesBetweenSaves");
+        bconsave = cf.getBoolean(poptions + ".BroadcastOnSave");
+        bconbu = cf.getBoolean(poptions + ".BroadcastOnBackup");
        
         
         
         
         if (!cExworlds) {
-        wlist = null;
+        wlist.clear();
         }
         if (!cExPlugins) {
-        plist = null;
+        plist.clear();
         }
         
         
