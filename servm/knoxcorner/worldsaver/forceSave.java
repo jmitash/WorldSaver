@@ -27,7 +27,7 @@ public class forceSave {
     
     public static boolean save() {
         if (worldSaver.bconsave) {
-        Bukkit.getServer().broadcastMessage(ChatColor.GREEN + "[WorldSaver] Saving worlds, you may experience lag");
+        Bukkit.getServer().broadcastMessage(ChatColor.GREEN + "[FixCraft] Dünya Kaydedildi.Laglar Silindi");
         saveRunner.waiting(250);
         }
         Bukkit.getServer().savePlayers();
